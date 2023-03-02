@@ -27,7 +27,7 @@ void	display()
 				glColor3f(1, 1, 1); glVertex3f(((vertices[tmp->points[i] - 1].x - (axis[0] + axis[1]) / 2) * cos(q) - (vertices[tmp->points[i] - 1].z - (axis[4] + axis[5]) / 2) * sin(q) + (axis[0] + axis[1]) / 2) / (axis[6] * 1.2), (vertices[tmp->points[i] - 1].y) / (axis[6] * 1.2), ((vertices[tmp->points[i] - 1].z - (axis[4] + axis[5]) / 2) * cos(q) + (vertices[tmp->points[i] - 1].x - (axis[0] + axis[1]) / 2) * sin(q) + (axis[4] + axis[5]) / 2) / (axis[6] * 1.2));
 			}
 		glEnd();
-		q += M_PI / 28800;
+		q += M_PI / (n * 200);
 		if (q >= M_PI)
 			q = -M_PI;
 		tmp = tmp->next;
