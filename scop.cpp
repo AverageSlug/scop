@@ -10,7 +10,7 @@
 
 t_vertex	*vertices = NULL;
 t_face		*faces = NULL;
-float		q = M_PI;
+float		q = -M_PI;
 float		axis[7] = {0, 0, 0, 0, 0, 0, 0};
 int			n = 0;
 
@@ -27,9 +27,9 @@ void	display()
 				glColor3f(1, 1, 1); glVertex3f(((vertices[tmp->points[i] - 1].x - (axis[0] + axis[1]) / 2) * cos(q) - (vertices[tmp->points[i] - 1].z - (axis[4] + axis[5]) / 2) * sin(q) + (axis[0] + axis[1]) / 2) / (axis[6] * 1.2), (vertices[tmp->points[i] - 1].y) / (axis[6] * 1.2), ((vertices[tmp->points[i] - 1].z - (axis[4] + axis[5]) / 2) * cos(q) + (vertices[tmp->points[i] - 1].x - (axis[0] + axis[1]) / 2) * sin(q) + (axis[4] + axis[5]) / 2) / (axis[6] * 1.2));
 			}
 		glEnd();
-		q -= M_PI / 2880000;
-		if (q <= -M_PI)
-			q = M_PI;
+		q += M_PI / 28800;
+		if (q >= M_PI)
+			q = -M_PI;
 		tmp = tmp->next;
 	}
 	glFlush();
@@ -38,50 +38,75 @@ void	display()
 void	move_object(unsigned char key)
 {
 	if (key == 49)
+	{
+		std::cout << "left" << std::endl;
 		for (int i = 0; i < n; i++)
-		{
 			vertices[i].x -= axis[6] / 100;
-			if (vertices[i].x < axis[0])
-				axis[0] = vertices[i].x;
-		}
+		axis[0] -= axis[6] / 100;
+		axis[1] -= axis[6] / 100;
+	}
 	else if (key == 55)
+	{
+		std::cout << "right" << std::endl;
 		for (int i = 0; i < n; i++)
-		{
 			vertices[i].x += axis[6] / 100;
-			if (vertices[i].x > axis[1])
-				axis[1] = vertices[i].x;
-		}
+		axis[0] += axis[6] / 100;
+		axis[1] += axis[6] / 100;
+	}
 	else if (key == 50)
+	{
+		std::cout << "down" << std::endl;
 		for (int i = 0; i < n; i++)
-		{
 			vertices[i].y -= axis[6] / 100;
-			if (vertices[i].y < axis[2])
-				axis[2] = vertices[i].y;
-		}
+		axis[2] -= axis[6] / 100;
+		axis[3] -= axis[6] / 100;
+	}
 	else if (key == 56)
+	{
+		std::cout << "up" << std::endl;
 		for (int i = 0; i < n; i++)
-		{
-			vertices[i].y -= axis[6] / 100;
-			if (vertices[i].y < axis[3])
-				axis[3] = vertices[i].y;
-		}
+			vertices[i].y += axis[6] / 100;
+		axis[2] += axis[6] / 100;
+		axis[3] += axis[6] / 100;
+	}
 	else if (key == 51)
+	{
+		std::cout << "backwards" << std::endl;
 		for (int i = 0; i < n; i++)
 		{
-			vertices[i].z -= axis[6] / 100;
-			if (vertices[i].z < axis[4])
-				axis[4] = vertices[i].z;
+			vertices[i].x *= 1.01;
+			vertices[i].y *= 1.01;
+			vertices[i].z *= 1.01;
+			// vertices[i].z -= axis[6] / 100;
 		}
+		axis[0] *= 1.01;
+		axis[1] *= 1.01;
+		axis[2] *= 1.01;
+		axis[3] *= 1.01;
+		axis[4] *= 1.01;
+		axis[5] *= 1.01;
+		// axis[4] -= axis[6] / 100;
+		// axis[5] -= axis[6] / 100;
+	}
 	else if (key == 57)
+	{
+		std::cout << "forwards" << std::endl;
 		for (int i = 0; i < n; i++)
 		{
-			vertices[i].z -= axis[6] / 100;
-			if (vertices[i].z < axis[5])
-				axis[5] = vertices[i].z;
+			vertices[i].x /= 1.01;
+			vertices[i].y /= 1.01;
+			vertices[i].z /= 1.01;
+			// vertices[i].z += axis[6] / 100;
 		}
-	for (int i = 0; i < 6; i++)
-		if (abs(axis[i]) > axis[6])
-			axis[6] = abs(axis[i]);
+		axis[0] /= 1.01;
+		axis[1] /= 1.01;
+		axis[2] /= 1.01;
+		axis[3] /= 1.01;
+		axis[4] /= 1.01;
+		axis[5] /= 1.01;
+		// axis[4] += axis[6] / 100;
+		// axis[5] += axis[6] / 100;
+	}
 }
 
 void	key_presses(unsigned char key, int x, int y)
