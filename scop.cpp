@@ -15,7 +15,7 @@ float		axis[7] = {0, 0, 0, 0, 0, 0, 0};
 int			n = 0;
 bool		tex_apply = false;
 int			width, height;
-const char	*data;
+std::string	data;
 GLuint texture;
 
 void	display()
@@ -30,7 +30,7 @@ void	display()
 			for (int i = 0; i < tmp->len; i++)
 			{
 				if (tex_apply)
-					glTexCoord2f(((vertices[tmp->points[i] - 1].x - (axis[0] + axis[1]) / 2) * cos(q) - (vertices[tmp->points[i] - 1].z - (axis[4] + axis[5]) / 2) * sin(q) + (axis[0] + axis[1]) / 2) / (axis[6] * 1.2), (vertices[tmp->points[i] - 1].y) / (axis[6] * 1.2));
+					glTexCoord2f(-vertices[tmp->points[i] - 1].x, -vertices[tmp->points[i] - 1].y);
 				else
 					glColor3f((f % 3) == 0 ? 1 : 0, (f % 3) == 1 ? 1 : 0, (f % 3) == 2 ? 1 : 0);
 				glVertex3f(((vertices[tmp->points[i] - 1].x - (axis[0] + axis[1]) / 2) * cos(q) - (vertices[tmp->points[i] - 1].z - (axis[4] + axis[5]) / 2) * sin(q) + (axis[0] + axis[1]) / 2) / (axis[6] * 1.2), (vertices[tmp->points[i] - 1].y) / (axis[6] * 1.2), -(((vertices[tmp->points[i] - 1].z - (axis[4] + axis[5]) / 2) * cos(q) + (vertices[tmp->points[i] - 1].x - (axis[0] + axis[1]) / 2) * sin(q) + (axis[4] + axis[5]) / 2) / (axis[6] * 1.2)));
@@ -79,37 +79,37 @@ void	move_object(unsigned char key)
 	{
 		for (int i = 0; i < n; i++)
 		{
+			vertices[i].z -= axis[6] / 100;
 			vertices[i].x *= 1.01;
 			vertices[i].y *= 1.01;
 			vertices[i].z *= 1.01;
-			// vertices[i].z -= axis[6] / 100;
 		}
+		axis[4] -= axis[6] / 100;
+		axis[5] -= axis[6] / 100;
 		axis[0] *= 1.01;
 		axis[1] *= 1.01;
 		axis[2] *= 1.01;
 		axis[3] *= 1.01;
 		axis[4] *= 1.01;
 		axis[5] *= 1.01;
-		// axis[4] -= axis[6] / 100;
-		// axis[5] -= axis[6] / 100;
 	}
 	else if (key == 57)
 	{
 		for (int i = 0; i < n; i++)
 		{
+			vertices[i].z += axis[6] / 100;
 			vertices[i].x /= 1.01;
 			vertices[i].y /= 1.01;
 			vertices[i].z /= 1.01;
-			// vertices[i].z += axis[6] / 100;
 		}
+		axis[4] += axis[6] / 100;
+		axis[5] += axis[6] / 100;
 		axis[0] /= 1.01;
 		axis[1] /= 1.01;
 		axis[2] /= 1.01;
 		axis[3] /= 1.01;
 		axis[4] /= 1.01;
 		axis[5] /= 1.01;
-		// axis[4] += axis[6] / 100;
-		// axis[5] += axis[6] / 100;
 	}
 }
 
@@ -249,7 +249,6 @@ int		parse_texture(char *filename)
 {
 	std::fstream	file;
 	std::string		str;
-	std::string		tmp_data;
 	int				i = 0;
 
 	file.open(filename, std::ios::in);
@@ -278,20 +277,11 @@ int		parse_texture(char *filename)
 				continue ;
 			}
 			else
-				tmp_data.append(str);
+				data.append(str);
 		}
 		std::getline(file, str);
 	}
 	file.close();
-	std::string		tmp_data69;
-	for (int j = height - 1; j >= 0; j--)
-		for (int i = 0; i < width * 3; i += 3)
-		{
-			tmp_data69.push_back(tmp_data[i + (j * width * 3)]);
-			tmp_data69.push_back(tmp_data[i + (j * width * 3) + 1]);
-			tmp_data69.push_back(tmp_data[i + (j * width * 3) + 2]);
-		}
-	data = tmp_data69.c_str();
 	return (0);
 }
 
@@ -333,7 +323,7 @@ int		main(int argc, char** argv)
 	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 	glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
 	glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data.c_str());
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glutDisplayFunc(display);
 	glutKeyboardFunc(key_presses);
