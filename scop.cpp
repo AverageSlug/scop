@@ -8,7 +8,7 @@
 
 #include "scop.hpp"
 
-t_vertex	*vertices = NULL;
+t_vertex	*vertices[2] = {NULL, NULL};
 t_face		*faces = NULL;
 float		q = M_PI;
 float		axis[7] = {0, 0, 0, 0, 0, 0, 0};
@@ -30,10 +30,10 @@ void	display()
 			for (int i = 0; i < tmp->len; i++)
 			{
 				if (tex_apply)
-					glTexCoord2f(-vertices[tmp->points[i] - 1].x, -vertices[tmp->points[i] - 1].y);
+					glTexCoord2f(-vertices[1][tmp->points[i] - 1].x, -vertices[1][tmp->points[i] - 1].y);
 				else
 					glColor3f((f % 3) == 0 ? 1 : 0, (f % 3) == 1 ? 1 : 0, (f % 3) == 2 ? 1 : 0);
-				glVertex3f(((vertices[tmp->points[i] - 1].x - (axis[0] + axis[1]) / 2) * cos(q) - (vertices[tmp->points[i] - 1].z - (axis[4] + axis[5]) / 2) * sin(q) + (axis[0] + axis[1]) / 2) / (axis[6] * 1.2), (vertices[tmp->points[i] - 1].y) / (axis[6] * 1.2), -(((vertices[tmp->points[i] - 1].z - (axis[4] + axis[5]) / 2) * cos(q) + (vertices[tmp->points[i] - 1].x - (axis[0] + axis[1]) / 2) * sin(q) + (axis[4] + axis[5]) / 2) / (axis[6] * 1.2)));
+				glVertex3f(((vertices[0][tmp->points[i] - 1].x - (axis[0] + axis[1]) / 2) * cos(q) - (vertices[0][tmp->points[i] - 1].z - (axis[4] + axis[5]) / 2) * sin(q) + (axis[0] + axis[1]) / 2) / (axis[6] * 1.2), (vertices[0][tmp->points[i] - 1].y) / (axis[6] * 1.2), ((vertices[0][tmp->points[i] - 1].z - (axis[4] + axis[5]) / 2) * cos(q) + (vertices[0][tmp->points[i] - 1].x - (axis[0] + axis[1]) / 2) * sin(q) + (axis[4] + axis[5]) / 2) / (axis[6] * 1.2));
 			}
 		glEnd();
 		tmp = tmp->next;
@@ -50,28 +50,28 @@ void	move_object(unsigned char key)
 	if (key == 49)
 	{
 		for (int i = 0; i < n; i++)
-			vertices[i].x -= axis[6] / 100;
+			vertices[0][i].x -= axis[6] / 100;
 		axis[0] -= axis[6] / 100;
 		axis[1] -= axis[6] / 100;
 	}
 	else if (key == 55)
 	{
 		for (int i = 0; i < n; i++)
-			vertices[i].x += axis[6] / 100;
+			vertices[0][i].x += axis[6] / 100;
 		axis[0] += axis[6] / 100;
 		axis[1] += axis[6] / 100;
 	}
 	else if (key == 50)
 	{
 		for (int i = 0; i < n; i++)
-			vertices[i].y -= axis[6] / 100;
+			vertices[0][i].y -= axis[6] / 100;
 		axis[2] -= axis[6] / 100;
 		axis[3] -= axis[6] / 100;
 	}
 	else if (key == 56)
 	{
 		for (int i = 0; i < n; i++)
-			vertices[i].y += axis[6] / 100;
+			vertices[0][i].y += axis[6] / 100;
 		axis[2] += axis[6] / 100;
 		axis[3] += axis[6] / 100;
 	}
@@ -79,10 +79,10 @@ void	move_object(unsigned char key)
 	{
 		for (int i = 0; i < n; i++)
 		{
-			vertices[i].z -= axis[6] / 100;
-			vertices[i].x *= 1.01;
-			vertices[i].y *= 1.01;
-			vertices[i].z *= 1.01;
+			vertices[0][i].z -= axis[6] / 100;
+			vertices[0][i].x *= 1.01;
+			vertices[0][i].y *= 1.01;
+			vertices[0][i].z *= 1.01;
 		}
 		axis[4] -= axis[6] / 100;
 		axis[5] -= axis[6] / 100;
@@ -97,10 +97,10 @@ void	move_object(unsigned char key)
 	{
 		for (int i = 0; i < n; i++)
 		{
-			vertices[i].z += axis[6] / 100;
-			vertices[i].x /= 1.01;
-			vertices[i].y /= 1.01;
-			vertices[i].z /= 1.01;
+			vertices[0][i].z += axis[6] / 100;
+			vertices[0][i].x /= 1.01;
+			vertices[0][i].y /= 1.01;
+			vertices[0][i].z /= 1.01;
 		}
 		axis[4] += axis[6] / 100;
 		axis[5] += axis[6] / 100;
@@ -152,59 +152,71 @@ int		parse(char *filename)
 	{
 		if (str.size() && str[0] == 'v')
 		{
-			if (!vertices)
-				vertices = new t_vertex[n + 1];
+			if (!vertices[0])
+			{
+				vertices[0] = new t_vertex[n + 1];
+				vertices[1] = new t_vertex[n + 1];
+			}
 			else
 			{
 				t_vertex	*tmp = new t_vertex[n + 1];
+				t_vertex	*tmp2 = new t_vertex[n + 1];
 				for (int i = 0; i < n; i++)
 				{
-					tmp[i].x = vertices[i].x;
-					tmp[i].y = vertices[i].y;
-					tmp[i].z = vertices[i].z;
+					tmp[i].x = vertices[0][i].x;
+					tmp[i].y = vertices[0][i].y;
+					tmp[i].z = vertices[0][i].z;
+					tmp2[i].x = vertices[1][i].x;
+					tmp2[i].y = vertices[1][i].y;
+					tmp2[i].z = vertices[1][i].z;
 				}
-				delete [] vertices;
-				vertices = tmp;
+				delete [] vertices[0];
+				delete [] vertices[1];
+				vertices[0] = tmp;
+				vertices[1] = tmp2;
 			}
 			int		pos = 0, pos2 = 0;
 			pos = str.find(" ", pos);
 			pos2 = str.find(" ", pos + 1);
-			vertices[n].x = std::stof(str.substr(pos + 1, pos2 - pos - 1));
+			vertices[0][n].x = std::stof(str.substr(pos + 1, pos2 - pos - 1));
+			vertices[1][n].x = std::stof(str.substr(pos + 1, pos2 - pos - 1));
 			if (axis[0] == 0 && axis[1] == 0)
 			{
-				axis[0] = vertices[n].x;
-				axis[1] = vertices[n].x;
+				axis[0] = vertices[0][n].x;
+				axis[1] = vertices[0][n].x;
 			}
-			if (vertices[n].x > axis[0])
-				axis[0] = vertices[n].x;
-			else if (vertices[n].x < axis[1])
-				axis[1] = vertices[n].x;
+			if (vertices[0][n].x > axis[0])
+				axis[0] = vertices[0][n].x;
+			else if (vertices[0][n].x < axis[1])
+				axis[1] = vertices[0][n].x;
 			pos = pos2;
 			pos = str.find(" ", pos);
 			pos2 = str.find(" ", pos + 1);
-			vertices[n].y = std::stof(str.substr(pos + 1, pos2 - pos - 1));
+			vertices[0][n].y = std::stof(str.substr(pos + 1, pos2 - pos - 1));
+			vertices[1][n].y = std::stof(str.substr(pos + 1, pos2 - pos - 1));
 			if (axis[2] == 0 && axis[3] == 0)
 			{
-				axis[2] = vertices[n].y;
-				axis[3] = vertices[n].y;
+				axis[2] = vertices[0][n].y;
+				axis[3] = vertices[0][n].y;
 			}
-			if (vertices[n].y > axis[2])
-				axis[2] = vertices[n].y;
-			else if (vertices[n].y < axis[3])
-				axis[3] = vertices[n].y;
+			if (vertices[0][n].y > axis[2])
+				axis[2] = vertices[0][n].y;
+			else if (vertices[0][n].y < axis[3])
+				axis[3] = vertices[0][n].y;
 			pos = pos2;
 			pos = str.find(" ", pos);
 			pos2 = str.find(" ", pos + 1);
-			vertices[n].z = std::stof(str.substr(pos + 1, pos2 - pos - 1));
+			vertices[0][n].z = std::stof(str.substr(pos + 1, pos2 - pos - 1));
+			vertices[1][n].z = std::stof(str.substr(pos + 1, pos2 - pos - 1));
 			if (axis[4] == 0 && axis[4] == 0)
 			{
-				axis[4] = vertices[n].z;
-				axis[5] = vertices[n].z;
+				axis[4] = vertices[0][n].z;
+				axis[5] = vertices[0][n].z;
 			}
-			if (vertices[n].z > axis[4])
-				axis[4] = vertices[n].z;
-			else if (vertices[n].z < axis[5])
-				axis[5] = vertices[n].z;
+			if (vertices[0][n].z > axis[4])
+				axis[4] = vertices[0][n].z;
+			else if (vertices[0][n].z < axis[5])
+				axis[5] = vertices[0][n].z;
 			n++;
 		}
 		if (str.size() && str[0] == 'f')
@@ -314,22 +326,12 @@ int		main(int argc, char** argv)
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-	glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
-	glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data.c_str());
-	glBindTexture(GL_TEXTURE_2D, texture);
 	glutDisplayFunc(display);
 	glutKeyboardFunc(key_presses);
-	glMatrixMode(GL_PROJECTION);
 	glEnable(GL_DEPTH_TEST);
-	glLoadIdentity();
 	glutIdleFunc(idle);
 	glutMainLoop();
 }
