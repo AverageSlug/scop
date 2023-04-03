@@ -22,26 +22,48 @@ void	display()
 {
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-	t_face	*tmp = faces;
-	int		f = 0;
-	while (tmp)
-	{
-		glBegin(GL_POLYGON);
-			for (int i = 0; i < tmp->len; i++)
-			{
-				if (tex_apply)
-					glTexCoord2f(-vertices[1][tmp->points[i] - 1].x, -vertices[1][tmp->points[i] - 1].y);
-				else
-					glColor3f((f % 3) == 0 ? 1 : 0, (f % 3) == 1 ? 1 : 0, (f % 3) == 2 ? 1 : 0);
-				glVertex3f(((vertices[0][tmp->points[i] - 1].x - (axis[0] + axis[1]) / 2) * cos(q) - (vertices[0][tmp->points[i] - 1].z - (axis[4] + axis[5]) / 2) * sin(q) + (axis[0] + axis[1]) / 2) / (axis[6] * 1.2), (vertices[0][tmp->points[i] - 1].y) / (axis[6] * 1.2), ((vertices[0][tmp->points[i] - 1].z - (axis[4] + axis[5]) / 2) * cos(q) + (vertices[0][tmp->points[i] - 1].x - (axis[0] + axis[1]) / 2) * sin(q) + (axis[4] + axis[5]) / 2) / (axis[6] * 1.2));
-			}
-		glEnd();
-		tmp = tmp->next;
-		f++;
-	}
-	q -= M_PI / 200;
-	if (q <= -M_PI)
-		q = M_PI;
+	glBegin(GL_POLYGON);
+		if (tex_apply)
+			glTexCoord2f(0, 0);
+		else
+			glColor3f(0, 0, 1);
+		glVertex3f(-0.5, -0.5, -0.5);
+		if (tex_apply)
+			glTexCoord2f(0, -1);
+		else
+			glColor3f(0, 1, 0);
+		glVertex3f(-0.5, 0.5, -0.5);
+		if (tex_apply)
+			glTexCoord2f(1, -1);
+		else
+			glColor3f(0, 0, 0);
+		glVertex3f(0.5, 0.5, -0.5);
+		if (tex_apply)
+			glTexCoord2f(1, 0);
+		else
+			glColor3f(1, 0, 0);
+		glVertex3f(0.5, -0.5, -0.5);
+	glEnd();
+	// t_face	*tmp = faces;
+	// int		f = 0;
+	// while (tmp)
+	// {
+	// 	glBegin(GL_POLYGON);
+	// 		for (int i = 0; i < tmp->len; i++)
+	// 		{
+	// 			if (tex_apply)
+	// 				glTexCoord2f(-vertices[1][tmp->points[i] - 1].x, -vertices[1][tmp->points[i] - 1].y);
+	// 			else
+	// 				glColor3f((f % 3) == 0 ? 1 : 0, (f % 3) == 1 ? 1 : 0, (f % 3) == 2 ? 1 : 0);
+	// 			glVertex3f(((vertices[0][tmp->points[i] - 1].x - (axis[0] + axis[1]) / 2) * cos(q) - (vertices[0][tmp->points[i] - 1].z - (axis[4] + axis[5]) / 2) * sin(q) + (axis[0] + axis[1]) / 2) / (axis[6] * 1.2), (vertices[0][tmp->points[i] - 1].y) / (axis[6] * 1.2), ((vertices[0][tmp->points[i] - 1].z - (axis[4] + axis[5]) / 2) * cos(q) + (vertices[0][tmp->points[i] - 1].x - (axis[0] + axis[1]) / 2) * sin(q) + (axis[4] + axis[5]) / 2) / (axis[6] * 1.2));
+	// 		}
+	// 	glEnd();
+	// 	tmp = tmp->next;
+	// 	f++;
+	// }
+	// q -= M_PI / 200;
+	// if (q <= -M_PI)
+	// 	q = M_PI;
 	glFlush();
 }
 
@@ -272,7 +294,7 @@ int		parse_texture(char *filename)
 	std::getline(file, str);
 	while (file)
 	{
-		if (!str.size() || str[0] != '#')
+		if (str.size() && str[0] != '#')
 		{
 			if (i < 3)
 			{
