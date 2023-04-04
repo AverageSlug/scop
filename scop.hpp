@@ -6,6 +6,9 @@
 #include <fstream>
 #include <cmath>
 
+#include <fcntl.h>
+#include <unistd.h>
+
 typedef struct	s_vertex
 {
 	float		x;

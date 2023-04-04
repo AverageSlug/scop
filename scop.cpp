@@ -15,7 +15,7 @@ float		axis[7] = {0, 0, 0, 0, 0, 0, 0};
 int			n = 0;
 bool		tex_apply = false;
 int			width, height;
-std::string	data;
+unsigned char	*data;
 GLuint texture;
 
 void	display()
@@ -200,8 +200,8 @@ int		parse(char *filename)
 			int		pos = 0, pos2 = 0;
 			pos = str.find(" ", pos);
 			pos2 = str.find(" ", pos + 1);
-			vertices[0][n].x = std::stof(str.substr(pos + 1, pos2 - pos - 1));
-			vertices[1][n].x = std::stof(str.substr(pos + 1, pos2 - pos - 1));
+			vertices[0][n].x = std::atof(str.substr(pos + 1, pos2 - pos - 1).c_str());
+			vertices[1][n].x = std::atof(str.substr(pos + 1, pos2 - pos - 1).c_str());
 			if (axis[0] == 0 && axis[1] == 0)
 			{
 				axis[0] = vertices[0][n].x;
@@ -214,8 +214,8 @@ int		parse(char *filename)
 			pos = pos2;
 			pos = str.find(" ", pos);
 			pos2 = str.find(" ", pos + 1);
-			vertices[0][n].y = std::stof(str.substr(pos + 1, pos2 - pos - 1));
-			vertices[1][n].y = std::stof(str.substr(pos + 1, pos2 - pos - 1));
+			vertices[0][n].y = std::atof(str.substr(pos + 1, pos2 - pos - 1).c_str());
+			vertices[1][n].y = std::atof(str.substr(pos + 1, pos2 - pos - 1).c_str());
 			if (axis[2] == 0 && axis[3] == 0)
 			{
 				axis[2] = vertices[0][n].y;
@@ -228,8 +228,8 @@ int		parse(char *filename)
 			pos = pos2;
 			pos = str.find(" ", pos);
 			pos2 = str.find(" ", pos + 1);
-			vertices[0][n].z = std::stof(str.substr(pos + 1, pos2 - pos - 1));
-			vertices[1][n].z = std::stof(str.substr(pos + 1, pos2 - pos - 1));
+			vertices[0][n].z = std::atof(str.substr(pos + 1, pos2 - pos - 1).c_str());
+			vertices[1][n].z = std::atof(str.substr(pos + 1, pos2 - pos - 1).c_str());
 			if (axis[4] == 0 && axis[4] == 0)
 			{
 				axis[4] = vertices[0][n].z;
@@ -270,7 +270,7 @@ int		parse(char *filename)
 				pos = pos2;
 				pos = str.find(" ", pos);
 				pos2 = str.find(" ", pos + 1);
-				tmp->points[i] = std::stoi(str.substr(pos + 1, pos2 - pos - 1));
+				tmp->points[i] = std::atoi(str.substr(pos + 1, pos2 - pos - 1).c_str());
 			}
 		}
 		std::getline(file, str);
@@ -303,19 +303,27 @@ int		parse_texture(char *filename)
 					int		pos = 0, pos2 = 0;
 					pos = str.find(" ", pos);
 					pos2 = str.find(" ", pos + 1);
-					width = stoi(str.substr(0, pos));
-					height = stoi(str.substr(pos + 1, pos2));
+					width = atoi(str.substr(0, pos).c_str());
+					height = atoi(str.substr(pos + 1, pos2).c_str());
 				}
 				i++;
-				std::getline(file, str);
+				if (i < 3)
+					std::getline(file, str);
 				continue ;
 			}
 			else
-				data.append(str);
+			{
+				file.close();
+				int			r, fd;
+				unsigned char		str2[width * height * 3];
+				fd = open(filename, O_RDONLY);
+				r = read(fd, str2, width * height * 3);
+				data = str2;
+				close(fd);
+				break ;
+			}
 		}
-		std::getline(file, str);
 	}
-	file.close();
 	return (0);
 }
 
@@ -341,7 +349,7 @@ int		main(int argc, char** argv)
 			axis[6] = abs(axis[i]);
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
-	glutInitWindowPosition(1600, 80);
+	glutInitWindowPosition(2000, 80);
 	glutInitWindowSize(400, 400);
 	glutCreateWindow("42");
 	glDisable(GL_TEXTURE_2D);
@@ -350,7 +358,7 @@ int		main(int argc, char** argv)
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data.c_str());
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 	glutDisplayFunc(display);
 	glutKeyboardFunc(key_presses);
 	glEnable(GL_DEPTH_TEST);
