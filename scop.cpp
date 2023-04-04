@@ -18,52 +18,48 @@ int			width, height;
 unsigned char	*data;
 GLuint texture;
 
+void	exit_clear()
+{
+	t_face *temp;
+
+	while (faces)
+	{
+		delete [] faces->points;
+		temp = faces->next;
+		delete faces;
+		faces = temp;
+	}
+
+	delete [] vertices[0];
+	delete [] vertices[1];
+	if (data)
+		free(data);
+	exit (0);
+}
+
 void	display()
 {
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
-	glBegin(GL_POLYGON);
-		if (tex_apply)
-			glTexCoord2f(0, 0);
-		else
-			glColor3f(0, 0, 1);
-		glVertex3f(-0.5, -0.5, -0.5);
-		if (tex_apply)
-			glTexCoord2f(0, -1);
-		else
-			glColor3f(0, 1, 0);
-		glVertex3f(-0.5, 0.5, -0.5);
-		if (tex_apply)
-			glTexCoord2f(1, -1);
-		else
-			glColor3f(0, 0, 0);
-		glVertex3f(0.5, 0.5, -0.5);
-		if (tex_apply)
-			glTexCoord2f(1, 0);
-		else
-			glColor3f(1, 0, 0);
-		glVertex3f(0.5, -0.5, -0.5);
-	glEnd();
-	// t_face	*tmp = faces;
-	// int		f = 0;
-	// while (tmp)
-	// {
-	// 	glBegin(GL_POLYGON);
-	// 		for (int i = 0; i < tmp->len; i++)
-	// 		{
-	// 			if (tex_apply)
-	// 				glTexCoord2f(-vertices[1][tmp->points[i] - 1].x, -vertices[1][tmp->points[i] - 1].y);
-	// 			else
-	// 				glColor3f((f % 3) == 0 ? 1 : 0, (f % 3) == 1 ? 1 : 0, (f % 3) == 2 ? 1 : 0);
-	// 			glVertex3f(((vertices[0][tmp->points[i] - 1].x - (axis[0] + axis[1]) / 2) * cos(q) - (vertices[0][tmp->points[i] - 1].z - (axis[4] + axis[5]) / 2) * sin(q) + (axis[0] + axis[1]) / 2) / (axis[6] * 1.2), (vertices[0][tmp->points[i] - 1].y) / (axis[6] * 1.2), ((vertices[0][tmp->points[i] - 1].z - (axis[4] + axis[5]) / 2) * cos(q) + (vertices[0][tmp->points[i] - 1].x - (axis[0] + axis[1]) / 2) * sin(q) + (axis[4] + axis[5]) / 2) / (axis[6] * 1.2));
-	// 		}
-	// 	glEnd();
-	// 	tmp = tmp->next;
-	// 	f++;
-	// }
-	// q -= M_PI / 200;
-	// if (q <= -M_PI)
-	// 	q = M_PI;
+	t_face	*tmp = faces;
+	int		f = 0;
+	while (tmp)
+	{
+		glBegin(GL_POLYGON);
+			for (int i = 0; i < tmp->len; i++)
+			{
+				if (tex_apply)
+					glTexCoord2f(-vertices[1][tmp->points[i] - 1].x, -vertices[1][tmp->points[i] - 1].y);
+				else
+					glColor3f((f % 3) == 0 ? 1 : 0, (f % 3) == 1 ? 1 : 0, (f % 3) == 2 ? 1 : 0);
+				glVertex3f(((vertices[0][tmp->points[i] - 1].x - (axis[0] + axis[1]) / 2) * cos(q) - (vertices[0][tmp->points[i] - 1].z - (axis[4] + axis[5]) / 2) * sin(q) + (axis[0] + axis[1]) / 2) / (axis[6] * 1.2), (vertices[0][tmp->points[i] - 1].y) / (axis[6] * 1.2), ((vertices[0][tmp->points[i] - 1].z - (axis[4] + axis[5]) / 2) * cos(q) + (vertices[0][tmp->points[i] - 1].x - (axis[0] + axis[1]) / 2) * sin(q) + (axis[4] + axis[5]) / 2) / (axis[6] * 1.2));
+			}
+		glEnd();
+		tmp = tmp->next;
+		f++;
+	}
+	q -= M_PI / 200;
+	if (q <= -M_PI)
+		q = M_PI;
 	glFlush();
 }
 
@@ -150,7 +146,7 @@ void	key_presses(unsigned char key, int x, int y)
 			glDisable(GL_TEXTURE_2D);
 	}
 	if (key == 27)
-		exit (0);
+		exit_clear();
 }
 
 void	idle()
@@ -166,8 +162,8 @@ int		parse(char *filename)
 	file.open(filename, std::ios::in);
 	if (!file)
 	{
-		std::cout << "Error opening file" << std::endl;
-		return (1);
+		std::cerr << "Error opening file" << std::endl;
+		exit_clear();
 	}
 	std::getline(file, str);
 	while (file)
@@ -288,8 +284,8 @@ int		parse_texture(char *filename)
 	file.open(filename, std::ios::in);
 	if (!file)
 	{
-		std::cout << "Error opening file" << std::endl;
-		return (1);
+		std::cerr << "Error opening file" << std::endl;
+		exit_clear();
 	}
 	std::getline(file, str);
 	while (file)
@@ -317,6 +313,11 @@ int		parse_texture(char *filename)
 				int			r, fd;
 				unsigned char		str2[width * height * 3];
 				fd = open(filename, O_RDONLY);
+				if (fd == -1)
+				{
+					std::cerr << "error opening file" << std::endl;
+					exit_clear();
+				}
 				for (int i = 0; i < 3; i++)
 				{
 					char c[2] = "0";
@@ -325,8 +326,12 @@ int		parse_texture(char *filename)
 				}
 				r = read(fd, str2, width * height * 3);
 				if (r != width * height * 3)
-					std::cout << "bad file" << std::endl;
-				data = (unsigned char *)malloc(sizeof(unsigned char) * width * height * 3);
+					std::cerr << "bad file" << std::endl;
+				if (!(data = (unsigned char *)malloc(sizeof(unsigned char) * width * height * 3)))
+				{
+					std::cerr << "malloc failed" << std::endl;
+					exit_clear();
+				}
 				memcpy(data, str2, width * height * 3);
 				close(fd);
 				break ;
