@@ -317,8 +317,17 @@ int		parse_texture(char *filename)
 				int			r, fd;
 				unsigned char		str2[width * height * 3];
 				fd = open(filename, O_RDONLY);
+				for (int i = 0; i < 3; i++)
+				{
+					char c[2] = "0";
+					while (c[0] != '\n')
+						read(fd, c, 1);
+				}
 				r = read(fd, str2, width * height * 3);
-				data = str2;
+				if (r != width * height * 3)
+					std::cout << "bad file" << std::endl;
+				data = (unsigned char *)malloc(sizeof(unsigned char) * width * height * 3);
+				memcpy(data, str2, width * height * 3);
 				close(fd);
 				break ;
 			}
