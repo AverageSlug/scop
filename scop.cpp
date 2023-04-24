@@ -15,6 +15,7 @@ float		axis[7] = {0, 0, 0, 0, 0, 0, 0};
 int			n = 0;
 bool		tex_apply = false;
 int			width, height;
+int			window;
 unsigned char	*data;
 GLuint texture;
 
@@ -32,6 +33,9 @@ void	exit_clear()
 
 	delete [] vertices[0];
 	delete [] vertices[1];
+
+	glutDestroyWindow(window);
+	
 	if (data)
 		free(data);
 	exit (0);
@@ -365,7 +369,7 @@ int		main(int argc, char** argv)
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
 	glutInitWindowPosition(2000, 80);
 	glutInitWindowSize(400, 400);
-	glutCreateWindow("42");
+	window = glutCreateWindow("42");
 	glDisable(GL_TEXTURE_2D);
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
